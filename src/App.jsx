@@ -54,10 +54,10 @@ function Grp204WeatherApp() {
         params: { q: input, units: "metric", appid: api_key },
       });
       setWeather({ data: res.data, loading: false, error: false });
-      setInput(res.data.city.name); // Update input with city name from the API response
+      setInput(res.data.city.name);
     } catch (error) {
       setWeather({ ...weather, data: {}, error: true });
-      setInput(""); // Reset input in case of error
+      setInput("");
     }
   };
 
@@ -87,7 +87,7 @@ function Grp204WeatherApp() {
         params: { q: city, units: "metric", appid: api_key },
       });
       setWeather({ data: res.data, loading: false, error: false });
-      setInput(res.data.city.name); // Update input with the name of the favorite city
+      setInput(res.data.city.name);
     } catch (error) {
       setWeather({ ...weather, data: {}, error: true });
     }
@@ -110,7 +110,7 @@ function Grp204WeatherApp() {
                 <li
                   key={index}
                   className="text-blue-600 cursor-pointer hover:underline whitespace-nowrap"
-                  onClick={() => searchFavorite(city)} // Call searchFavorite on click
+                  onClick={() => searchFavorite(city)}
                 >
                   {city}
                 </li>
@@ -124,12 +124,12 @@ function Grp204WeatherApp() {
             type="text"
             className="flex-1 p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 transition"
             placeholder="Entrez le nom de la ville..."
-            value={input} // Bind input value
-            onChange={(event) => setInput(event.target.value)} // Update input on change
-            onKeyPress={handleKeyPress} // Trigger search on Enter key press
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyPress={handleKeyPress}
           />
           <button
-            onClick={search} // Trigger search on button click
+            onClick={search}
             className="ml-4 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
           >
             Rechercher
