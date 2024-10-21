@@ -1,22 +1,19 @@
 import { Oval } from "react-loader-spinner";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFrown } from "@fortawesome/free-solid-svg-icons";
 
 function Grp204WeatherApp() {
+  // Initialize favorites by fetching from localStorage on component mount
+  const savedFavorites = JSON.parse(localStorage.getItem("favorites")) || [];
+  const [favorites, setFavorites] = useState(savedFavorites);
   const [input, setInput] = useState("");
   const [weather, setWeather] = useState({
     loading: false,
     data: {},
     error: false,
   });
-  const [favorites, setFavorites] = useState([]);
-
-  useEffect(() => {
-    const savedFavorites = JSON.parse(localStorage.getItem("favorites")) || [];
-    setFavorites(savedFavorites);
-  }, []);
 
   const toDateFunction = (date) => {
     const months = [
@@ -43,34 +40,31 @@ function Grp204WeatherApp() {
       "Samedi",
     ];
     const currentDate = new Date(date);
-    const formattedDate = `${
-      weekDays[currentDate.getDay()]
-    } ${currentDate.getDate()} ${months[currentDate.getMonth()]}`;
-    return formattedDate;
+    return `${weekDays[currentDate.getDay()]} ${currentDate.getDate()} ${
+      months[currentDate.getMonth()]
+    }`;
   };
 
-  const search = async (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
+  const search = async () => {
+    if (input.trim() === "") return;
+    setWeather({ ...weather, loading: true });
+    const url = "https://api.openweathermap.org/data/2.5/forecast";
+    const api_key = "f00c38e0279b7bc85480c3fe775d518c";
+    try {
+      const res = await axios.get(url, {
+        params: { q: input, units: "metric", appid: api_key },
+      });
+      setWeather({ data: res.data, loading: false, error: false });
+      setInput(res.data.city.name); // update input with city name from API response
+    } catch (error) {
+      setWeather({ ...weather, data: {}, error: true });
       setInput("");
-      setWeather({ ...weather, loading: true });
-      const url = "https://api.openweathermap.org/data/2.5/forecast";
-      const api_key = "f00c38e0279b7bc85480c3fe775d518c";
-      await axios
-        .get(url, {
-          params: {
-            q: input,
-            units: "metric",
-            appid: api_key,
-          },
-        })
-        .then((res) => {
-          setWeather({ data: res.data, loading: false, error: false });
-        })
-        .catch((error) => {
-          setWeather({ ...weather, data: {}, error: true });
-          setInput("");
-        });
+    }
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      search();
     }
   };
 
@@ -89,25 +83,19 @@ function Grp204WeatherApp() {
     setWeather({ ...weather, loading: true });
     const url = "https://api.openweathermap.org/data/2.5/forecast";
     const api_key = "f00c38e0279b7bc85480c3fe775d518c";
-    await axios
-      .get(url, {
-        params: {
-          q: city,
-          units: "metric",
-          appid: api_key,
-        },
-      })
-      .then((res) => {
-        setWeather({ data: res.data, loading: false, error: false });
-      })
-      .catch((error) => {
-        setWeather({ ...weather, data: {}, error: true });
+    try {
+      const res = await axios.get(url, {
+        params: { q: city, units: "metric", appid: api_key },
       });
+      setWeather({ data: res.data, loading: false, error: false });
+    } catch (error) {
+      setWeather({ ...weather, data: {}, error: true });
+    }
   };
 
   return (
-    <div className="container mx-auto h-[100vh] flex flex-col justify-center items-center bg-gray-100">
-      <div className="bg-white shadow-xl rounded-lg p-8 w-full max-w-2xl overflow-hidden">
+    <div className="container mx-auto h-screen flex flex-col justify-center items-center bg-gray-100">
+      <div className="bg-white shadow-xl rounded-lg p-8 w-full max-w-2xl">
         <h1 className="text-gray-800 text-3xl font-semibold mb-6 text-center">
           Application Météo
         </h1>
@@ -134,16 +122,21 @@ function Grp204WeatherApp() {
         <div className="flex items-center mb-6">
           <input
             type="text"
-            className="flex-1 p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500"
+            className="flex-1 p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 transition"
             placeholder="Entrez le nom de la ville..."
-            name="query"
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            onKeyPress={search}
+            onKeyPress={handleKeyPress} // handle Enter key
           />
           <button
+            onClick={search} // handle search on button click
+            className="ml-4 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+          >
+            Rechercher
+          </button>
+          <button
             onClick={addToFavorites}
-            className="ml-4 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700"
+            className="ml-4 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
           >
             Ajouter aux favoris
           </button>
